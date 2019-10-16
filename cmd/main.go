@@ -1,7 +1,9 @@
 package main
 
 import (
+	"log"
 	"net/http"
+	"os"
 
 	"github.com/gin-gonic/gin"
 )
@@ -11,6 +13,12 @@ const (
 )
 
 func main() {
+	externalPort := os.Getenv("PORT")
+
+	if externalPort == "" {
+		log.Fatal("$PORT must be set")
+	}
+
 	gin.SetMode(gin.ReleaseMode)
 
 	externalRouter := gin.Default()
