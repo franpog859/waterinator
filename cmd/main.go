@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"net/http"
 	"os"
 
@@ -9,14 +8,13 @@ import (
 )
 
 const (
-	externalPort = ":8000"
+	externalPort = "8000"
 )
 
 func main() {
-	externalPort := os.Getenv("PORT")
-
-	if externalPort == "" {
-		log.Fatal("$PORT must be set")
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = externalPort
 	}
 
 	gin.SetMode(gin.ReleaseMode)
@@ -26,5 +24,5 @@ func main() {
 		context.JSON(http.StatusOK, "Hello!")
 	})
 
-	externalRouter.Run(externalPort)
+	externalRouter.Run(":" + port)
 }
