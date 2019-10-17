@@ -3,17 +3,19 @@ package database
 import (
 	"context"
 	"fmt"
+	"os"
 
-	"github.com/franpog859/waterinator/lambda/internal/model"
+	"github.com/franpog859/waterinator/lambda/pkg/model"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 const (
-	mongoDBServiceURI = "mongodb://mongo-database-internal:27017"
-	databaseName      = "waterinator"
-	collectionName    = "sensordata"
+	mongoDBServiceURIFormat = "mongodb+srv://waterinator:%s@franpog-cluster-uteiq.mongodb.net/test?retryWrites=true&w=majority"
+	databaseName            = "waterinator"
+	collectionName          = "sensordata"
+	passwordEnvName         = "DATABASE_PASSWORD"
 )
 
 // Client interface
@@ -27,6 +29,11 @@ type client struct {
 
 // NewClient provides Client interface
 func NewClient() (Client, error) {
+	mongoDBServiceURI, err := provideFullMongoDBServiceURI()
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to provide full mongo service URI")
+	}
+
 	clientOptions := options.Client().ApplyURI(mongoDBServiceURI)
 	mongoDBClient, err := mongo.Connect(context.TODO(), clientOptions)
 	if err != nil {
@@ -51,4 +58,14 @@ func (c *client) PostSensorData(data string) error {
 	}
 
 	return nil
+}
+
+func provideFullMongoDBServiceURI() (string, error) {
+	password := os.Getenv(passwordEnvName)
+	if password == "" {
+		return "", fmt.Errorf("failed to read password from environment variable: %s", passwordEnvName)
+	}
+
+	uri := fmt.Sprintf(mongoDBServiceURIFormat, password)
+	return uri, nil
 }

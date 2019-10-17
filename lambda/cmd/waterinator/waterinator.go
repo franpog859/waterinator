@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/franpog859/waterinator/lambda/internal/database"
+	"github.com/franpog859/waterinator/lambda/pkg/database"
 	"github.com/pkg/errors"
 )
 

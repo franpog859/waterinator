@@ -1,6 +1,4 @@
-module github.com/franpog859/waterinator/internal
-
-go 1.13
+module github.com/franpog859/waterinator/lambda/pkg
 
 require (
 	github.com/go-stack/stack v1.8.0 // indirect

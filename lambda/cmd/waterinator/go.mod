@@ -1,3 +1,8 @@
-module github.com/franpog859/waterinator/cmd
+module github.com/franpog859/waterinator/lambda/cmd/waterinator
 
-go 1.13
+require (
+	github.com/franpog859/waterinator/lambda/pkg v0.0.0
+	github.com/pkg/errors v0.8.1
+)
+
+replace github.com/franpog859/waterinator/lambda/pkg => ../../pkg
