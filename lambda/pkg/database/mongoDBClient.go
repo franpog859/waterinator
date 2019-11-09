@@ -21,7 +21,7 @@ const (
 
 // Client interface
 type Client interface {
-	PostSensorData(string) error
+	PostSensorData(model.SensorDataDatabase) error
 }
 
 type client struct {
@@ -54,11 +54,7 @@ func NewClient() (Client, error) {
 	}, nil
 }
 
-func (c *client) PostSensorData(data string) error {
-	sensorData := model.SensorData{
-		Data: data,
-	}
-
+func (c *client) PostSensorData(sensorData model.SensorDataDatabase) error {
 	_, err := c.collection.InsertOne(context.TODO(), sensorData)
 	if err != nil {
 		return errors.Wrap(err, "failed to insert sensor data")
