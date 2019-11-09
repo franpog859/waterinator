@@ -4,20 +4,29 @@
 const int second = 1000;
 const int waitTime = 10 * second;
 
-const int hardwareID = 0;
+const int enginePin = 13;
+const int engineOnTime = 2 * second;
+const int engineBufferTime = 2 * second;
+
+const int sensorPin = 34;
+const int humidityThreshold = 40;
+
 const int serialBaud = 115200;
 const int serialSetupTime = 4 * second;
 
 const char* wifiSsid = "frun.";
 const char* wifiPassword = "nodemcutest1";
 const int connectRetries = 5;
-const int retryTime = 2 * second;
+const int connectRetryTime = 2 * second;
+
+const int hardwareID = 0;
+const char* serviceURL = "http://jsonplaceholder.typicode.com/posts"; //TODO: Change it later to lambda
 
 bool connectToWiFi() {
   WiFi.begin(wifiSsid, wifiPassword);
 
   for (int i = 0; i < connectRetries && WiFi.status() != WL_CONNECTED; i++) {
-    delay(retryTime);
+    delay(connectRetryTime);
     Serial.println("Connecting to WiFi...");
   }
 
@@ -29,6 +38,29 @@ bool connectToWiFi() {
   return true;
 }
 
+int getHumidity() {
+  int humidity = map(analogRead(sensorPin), 1023, 0, 0, 100);
+  return humidity;
+}
+
+bool shouldWater(int humidity) {
+  Serial.print("Humitity value: ");
+  Serial.print(humidity);
+  Serial.println("%");
+  return (humidity < humidityThreshold);
+}
+
+bool water() {
+  Serial.println("Turning the engine on...");
+  digitalWrite(enginePin, HIGH);
+  delay(engineOnTime);
+  digitalWrite(enginePin, LOW);
+  Serial.println("Making sure that thy engine is off...");
+  delay(engineBufferTime);
+  digitalWrite(enginePin, LOW);
+  return true;
+}
+
 bool reconnectToWiFi() {
   if (WiFi.status() != WL_CONNECTED) {
     Serial.println("Reconnecting to WiFi...");
@@ -37,25 +69,23 @@ bool reconnectToWiFi() {
   return (WiFi.status() == WL_CONNECTED);
 }
 
-char* preparePayload(float humidity, bool didWater) {
-  char humidityStr[5];
-  dtostrf(humidity, 4, 2, humidityStr);
+char* preparePayload(int humidity, bool didWater) {
   static char payload[128];
-  sprintf(payload, "{\"hardwareID\":%d,\"humidityPercent\":%s,\"didWater\":%d}", hardwareID, humidityStr, didWater);
+  sprintf(payload, "{\"hardwareID\":%d,\"humidityPercent\":%d,\"didWater\":%d}", hardwareID, humidity, didWater);
   return payload;
 }
 
 int sendPostRequest(HTTPClient* http, char* payload) {
-  http->begin("http://jsonplaceholder.typicode.com/posts"); //TODO: Change it later to lambda
+  http->begin(serviceURL);
   http->addHeader("Content-Type", "application/json");
   int httpResponseCode = http->POST(payload);
   return httpResponseCode;
 }
 
 void printResponse(int responseCode, String response) {
-  if(responseCode>0) {
-    Serial.println(responseCode);   
-    Serial.println(response);       
+  if (responseCode > 0) {
+    Serial.println(responseCode);
+    Serial.println(response);
   } else {
     Serial.print("Error while sending POST request: ");
     Serial.println(responseCode);
@@ -67,6 +97,7 @@ void wait() {
 }
 
 void setup() {
+  pinMode(enginePin, OUTPUT);
   Serial.begin(serialBaud);
   delay(serialSetupTime);
   connectToWiFi();
@@ -74,25 +105,28 @@ void setup() {
 
 void loop() {
   Serial.println("Checking humidity...");
-  float humidity = 0.0; //TODO: Implement real function
-  
-  Serial.println("Watering plants...");
-  bool didWater = false; //TODO: Implement real function
-  
+  int humidity = getHumidity();
+
+  bool didWater = false;
+  if (shouldWater(humidity)) {
+    Serial.println("Watering plants...");
+    didWater = water();
+  }
+
   if (!reconnectToWiFi()) {
     wait();
     return;
   }
-  
+
   Serial.println("Preparing payload...");
   char* payload = preparePayload(humidity, didWater);
-  
+
   Serial.println("Sending http request...");
   HTTPClient http;
   int responseCode = sendPostRequest(&http, payload);
   printResponse(responseCode, http.getString());
   http.end();
-  
+
   Serial.println("Waiting...");
   wait();
 }
