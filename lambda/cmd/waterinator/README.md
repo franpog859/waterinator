@@ -28,3 +28,9 @@ export PROJECT_NAME={GCP_PROJECT_NAME}
 
 gcloud functions deploy SaveSensorDataToDatabase --region=us-central1 --runtime go111 --trigger-http --project $PROJECT_NAME --set-env-vars DATABASE_USERNAME=$DATABASE_USERNAME --set-env-vars DATABASE_PASSWORD=$DATABASE_PASSWORD --set-env-vars MONGO_URI_FORMAT=$MONGO_URI_FORMAT --set-env-vars DATABASE_NAME=$DATABASE_NAME --set-env-vars COLLECTION_NAME=$COLLECTION_NAME
 ```
+
+To make valid test request run:
+
+```bash
+curl -X POST {LAMBDA_URL} -d "{\"hardwareID\":123,\"humidityPercent\":42,\"didWater\":1}" -H "Content-type: application/json"
+```
