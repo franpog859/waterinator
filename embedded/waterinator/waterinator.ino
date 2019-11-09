@@ -2,10 +2,10 @@
 #include <HTTPClient.h>
 
 const int second = 1000;
-const int waitTime = 10 * second;
+const int waitTime = 120 * second;
 
 const int enginePin = 13;
-const int engineOnTime = 2 * second;
+const int engineOnTime = 1 * second;
 const int engineBufferTime = 2 * second;
 
 const int sensorPin = 34;
@@ -20,7 +20,7 @@ const int connectRetries = 5;
 const int connectRetryTime = 2 * second;
 
 const int hardwareID = 0;
-const char* serviceURL = "http://jsonplaceholder.typicode.com/posts"; //TODO: Change it later to lambda
+const char* serviceURL = "https://us-central1-directed-portal-233418.cloudfunctions.net/SaveSensorDataToDatabase";
 
 bool connectToWiFi() {
   WiFi.begin(wifiSsid, wifiPassword);
@@ -55,7 +55,9 @@ bool water() {
   digitalWrite(enginePin, HIGH);
   delay(engineOnTime);
   digitalWrite(enginePin, LOW);
-  Serial.println("Making sure that thy engine is off...");
+  Serial.println("Making sure that the engine is off...");
+  delay(engineBufferTime);
+  digitalWrite(enginePin, LOW);
   delay(engineBufferTime);
   digitalWrite(enginePin, LOW);
   return true;
@@ -84,7 +86,9 @@ int sendPostRequest(HTTPClient* http, char* payload) {
 
 void printResponse(int responseCode, String response) {
   if (responseCode > 0) {
+    Serial.print("Response code: ");
     Serial.println(responseCode);
+    Serial.print("Response body: ");
     Serial.println(response);
   } else {
     Serial.print("Error while sending POST request: ");
