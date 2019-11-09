@@ -15,5 +15,11 @@ To rebuild the solution and upload it to the board press the `Upload` button on 
 
 # Hardware
 
-- Board: NODEMCU ESP-32S
+- NodeMcu ESP-32S
+- HL-69 sensor
+- Mini water pump DC 5V
+- IRF520 mosfet DC 5A 24V
+- Power supply 3A 5V
+- DC socket 2.1/5.5mm
+- wires, resistors and capacitors
 

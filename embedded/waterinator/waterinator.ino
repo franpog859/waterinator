@@ -2,14 +2,14 @@
 #include <HTTPClient.h>
 
 const int second = 1000;
-const int waitTime = 120 * second;
+const int waitTime = 30 * 60 * second;
 
 const int enginePin = 13;
 const int engineOnTime = 1 * second;
 const int engineBufferTime = 2 * second;
 
 const int sensorPin = 34;
-const int humidityThreshold = 40;
+const int humidityThreshold = 30;
 
 const int serialBaud = 115200;
 const int serialSetupTime = 4 * second;
@@ -39,7 +39,7 @@ bool connectToWiFi() {
 }
 
 int getHumidity() {
-  int humidity = map(analogRead(sensorPin), 1023, 0, 0, 100);
+  int humidity = map(analogRead(sensorPin), 0, 1023, 100, 0);
   return humidity;
 }
 
