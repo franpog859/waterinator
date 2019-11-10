@@ -16,10 +16,11 @@ export DATABASE_NAME="waterinator"
 export COLLECTION_NAME="sensordata"
 ```
 
-To run the script run:
+To fetch the data, print and save figures run:
 
 ```bash
-python print-sensor-data.py
+python fetch-data.py
+python print-figures.py
 ```
 
 To save the requirements after development run:

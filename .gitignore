@@ -3,3 +3,5 @@ env
 bin/
 .docker_build/
 vendor/
+.vscode/
+*.csv
