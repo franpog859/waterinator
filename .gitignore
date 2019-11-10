@@ -1,4 +1,5 @@
 env
+*.psd
 .env/
 bin/
 .docker_build/

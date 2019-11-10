@@ -1,10 +1,12 @@
 # Waterinator
 
-> TODO: add here some logo with a leaf and a drop on it
+<p align="center">
+<img src="https://raw.githubusercontent.com/franpog859/waterinator/master/assets/waterinator_logo.png">
+</p>
 
-This summer I started to grow cucumbers. It was fun but after a week it started to be monotonous and not as fun as at the beginning. I discovered that remembering about watering the plants is sooo hard. And that's how Waterinator was born.
+Last summer I started to grow tomatoes. It was fun but after a couple of weeks it started to by just monotonous. Remembering about the watering plants is sooo hard! And that's how Waterinator was born.
 
-Waterinator is an IoT project which combines low level C code for Espressif chip, Go code running in the cloud and Python scripts used for playing around with the generated data. 
+Waterinator is an IoT project which combines low level C code for Espressif chip, Go code running in the cloud and Python scripts used for playing around with the generated data. It just waters the plants and sends the data into cloud. Pure nature!
 
 ## EMBEDDED
 
@@ -18,7 +20,7 @@ Go code deployed in Google Cloud Platform as a Function runs only when it is tri
 
 Python scripts which fetch the data from the database and generate pleasant plots. Diagrams could be used to analyse the data and to understand how the whole project works in real time.
 
-> TODO: add here some good looking plot
+> TODO: Add here some good looking plot!
 
 ### Development
 

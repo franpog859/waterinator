@@ -14,13 +14,13 @@ const int humidityThreshold = 30;
 const int serialBaud = 115200;
 const int serialSetupTime = 4 * second;
 
-const char* wifiSsid = "frun.";
-const char* wifiPassword = "nodemcutest1";
+const char* wifiSsid = "";
+const char* wifiPassword = "";
 const int connectRetries = 5;
 const int connectRetryTime = 2 * second;
 
 const int hardwareID = 0;
-const char* serviceURL = "https://us-central1-directed-portal-233418.cloudfunctions.net/SaveSensorDataToDatabase";
+const char* serviceURL = "";
 
 bool connectToWiFi() {
   WiFi.begin(wifiSsid, wifiPassword);
