@@ -5,11 +5,14 @@ const int second = 1000;
 const int waitTime = 30 * 60 * second;
 
 const int enginePin = 13;
-const int engineOnTime = 1 * second;
+const int engineOnTime = 3 * second;
 const int engineBufferTime = 2 * second;
 
 const int sensorPin = 34;
-const int humidityThreshold = 30;
+const int humidityLowThreshold = 60; // It should be defined via testing.
+const int humidityHighThreshold = 63; // It should be defined via testing.
+const int wateringCounterThreshold = 10;
+const int betweenWateringTime = 1 * 60 * second;
 
 const int serialBaud = 115200;
 const int serialSetupTime = 4 * second;
@@ -40,17 +43,21 @@ bool connectToWiFi() {
 
 int getHumidity() {
   int humidity = map(analogRead(sensorPin), 0, 1023, 100, 0);
-  return humidity;
-}
-
-bool shouldWater(int humidity) {
   Serial.print("Humitity value: ");
   Serial.print(humidity);
   Serial.println("%");
-  return (humidity < humidityThreshold);
+  return humidity;
 }
 
-bool water() {
+bool shouldStartWatering(int humidity) {
+  return (humidity < humidityLowThreshold);
+}
+
+bool shouldContinueWatering(int humidity, int wateringCounter) {
+  return (humidity < humidityHighThreshold && wateringCounter < wateringCounterThreshold);
+}
+
+void water() {
   Serial.println("Turning the engine on...");
   digitalWrite(enginePin, HIGH);
   delay(engineOnTime);
@@ -60,7 +67,6 @@ bool water() {
   digitalWrite(enginePin, LOW);
   delay(engineBufferTime);
   digitalWrite(enginePin, LOW);
-  return true;
 }
 
 bool reconnectToWiFi() {
@@ -112,17 +118,27 @@ void loop() {
   int humidity = getHumidity();
 
   bool didWater = false;
-  if (shouldWater(humidity)) {
-    Serial.println("Watering plants...");
-    didWater = water();
+  if (shouldStartWatering(humidity)) {
+    int wateringCounter = 0;
+    while (shouldContinueWatering(humidity, wateringCounter)) {
+      Serial.println("Watering plants...");
+      water();
+      delay(betweenWateringTime);
+
+      wateringCounter++;
+      didWater = true;
+      humidity = getHumidity();
+    }
   }
 
   if (!reconnectToWiFi()) {
+    Serial.println("Waiting...");
     wait();
     return;
   }
 
   Serial.println("Preparing payload...");
+  humidity = getHumidity();
   char* payload = preparePayload(humidity, didWater);
 
   Serial.println("Sending http request...");
