@@ -16,7 +16,7 @@ To rebuild the solution and upload it to the board press the `Upload` button on 
 # Hardware
 
 - NodeMcu ESP-32S
-- HL-69 sensor
+- Capacitive Soil Moisture Sensor v1.2
 - Mini water pump DC 5V
 - IRF520 mosfet DC 5A 24V
 - Power supply 3A 5V
