@@ -34,3 +34,11 @@ To exit the virtual environment run:
 ```bash
 deactivate
 ```
+
+## Figures
+
+Here is what you can read from the figures and what are they used for:
+
+- `humidity_time.png` - shows how the humidity changes in time and marks points when the chip watered the ground. It's used to control overall work of the project and to tune initial threshold for humidity
+- `did_water.png` - shows how many times the chip took an action and watered the plant and how many it just mesured the humidity and just waited. It's used to tune a wait time of the chip
+- `when_water.png` - shows at which percent of the humidity the chip waters the plant. It's used to tume humidity threshold
