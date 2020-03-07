@@ -5,14 +5,14 @@ const int second = 1000;
 const int waitTime = 30 * 60 * second;
 
 const int enginePin = 13;
-const int engineOnTime = 3 * second;
+const int engineOnTime = 5 * second;
 const int engineBufferTime = 2 * second;
 
 const int sensorPin = 34;
-const int humidityLowThreshold = 60; // It should be defined via testing.
+const int humidityLowThreshold = 62; // It should be defined via testing.
 const int humidityHighThreshold = 63; // It should be defined via testing.
 const int wateringCounterThreshold = 10;
-const int betweenWateringTime = 1 * 60 * second;
+const int betweenWateringTime = 30 * second;
 
 const int serialBaud = 115200;
 const int serialSetupTime = 4 * second;
