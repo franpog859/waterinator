@@ -2,17 +2,20 @@
 #include <HTTPClient.h>
 
 const int second = 1000;
-const int waitTime = 30 * 60 * second;
+const int waitTime = 15 * 60 * second;
+
+const int ledPin = 2;
 
 const int enginePin = 13;
-const int engineOnTime = 5 * second;
+const int engineOnTime = 10 * second;
 const int engineBufferTime = 2 * second;
 
 const int sensorPin = 34;
-const int humidityLowThreshold = 62; // It should be defined via testing.
-const int humidityHighThreshold = 63; // It should be defined via testing.
-const int wateringCounterThreshold = 10;
+const float humidityLowThreshold = 71.5;
+const float humidityHighThreshold = 72.2;
+const int wateringCounterThreshold = 5;
 const int betweenWateringTime = 30 * second;
+const int sensorBlinkLedTime = 250;
 
 const int serialBaud = 115200;
 const int serialSetupTime = 4 * second;
@@ -21,6 +24,8 @@ const char* wifiSsid = "";
 const char* wifiPassword = "";
 const int connectRetries = 5;
 const int connectRetryTime = 2 * second;
+const int connectBlinkLedCounter = 3;
+const int connectBlinkLedTime = 150;
 
 const int hardwareID = 0;
 const char* serviceURL = "";
@@ -38,22 +43,44 @@ bool connectToWiFi() {
     return false;
   }
   Serial.println("Connected to WiFi network");
+  blinkLed(connectBlinkLedCounter, connectBlinkLedTime);
   return true;
 }
 
-int getHumidity() {
-  int humidity = map(analogRead(sensorPin), 0, 1023, 100, 0);
-  Serial.print("Humitity value: ");
-  Serial.print(humidity);
-  Serial.println("%");
+void blinkLed(int howMany, int howLong) {
+  for (int i = 0; i < howMany; i++) {
+    digitalWrite(ledPin, HIGH);
+    delay(howLong);
+    digitalWrite(ledPin, LOW);
+    delay(howLong);
+  }
+}
+
+float getHumidity() {
+  int sensorMeasurement = map(analogRead(sensorPin), 0, 1023, 1000, 0);
+  blinkSensorMeasurement(sensorMeasurement);
+  float humidity = (float)sensorMeasurement / 10.0;
+  Serial.printf("Humitity value: %.1f %s\n", humidity, "%");
   return humidity;
 }
 
-bool shouldStartWatering(int humidity) {
+void blinkSensorMeasurement(int sensorMeasurement) {
+  Serial.println("Blinking sensor measurement...");
+  int hundreds = sensorMeasurement / 100;
+  blinkLed(hundreds, sensorBlinkLedTime);
+  delay(second);
+  int tens = (sensorMeasurement - 100 * hundreds) / 10;
+  blinkLed(tens, sensorBlinkLedTime);
+  delay(second);
+  int units = (sensorMeasurement - 100 * hundreds) - 10 * tens;
+  blinkLed(units, sensorBlinkLedTime);
+}
+
+bool shouldStartWatering(float humidity) {
   return (humidity < humidityLowThreshold);
 }
 
-bool shouldContinueWatering(int humidity, int wateringCounter) {
+bool shouldContinueWatering(float humidity, int wateringCounter) {
   return (humidity < humidityHighThreshold && wateringCounter < wateringCounterThreshold);
 }
 
@@ -77,9 +104,9 @@ bool reconnectToWiFi() {
   return (WiFi.status() == WL_CONNECTED);
 }
 
-char* preparePayload(int humidity, bool didWater) {
+char* preparePayload(float humidity, bool didWater) {
   static char payload[128];
-  sprintf(payload, "{\"hardwareID\":%d,\"humidityPercent\":%d,\"didWater\":%d}", hardwareID, humidity, didWater);
+  sprintf(payload, "{\"hardwareID\":%d,\"humidityPercent\":%.1f,\"didWater\":%d}", hardwareID, humidity, didWater);
   return payload;
 }
 
@@ -92,13 +119,9 @@ int sendPostRequest(HTTPClient* http, char* payload) {
 
 void printResponse(int responseCode, String response) {
   if (responseCode > 0) {
-    Serial.print("Response code: ");
-    Serial.println(responseCode);
-    Serial.print("Response body: ");
-    Serial.println(response);
+    Serial.printf("Response code: %d\nResponseBody: %s\n", responseCode, response);
   } else {
-    Serial.print("Error while sending POST request: ");
-    Serial.println(responseCode);
+    Serial.printf("Error while sending POST request: %d\n", responseCode);
   }
 }
 
@@ -107,6 +130,7 @@ void wait() {
 }
 
 void setup() {
+  pinMode(ledPin, OUTPUT);
   pinMode(enginePin, OUTPUT);
   Serial.begin(serialBaud);
   delay(serialSetupTime);
@@ -115,7 +139,7 @@ void setup() {
 
 void loop() {
   Serial.println("Checking humidity...");
-  int humidity = getHumidity();
+  float humidity = getHumidity();
 
   bool didWater = false;
   if (shouldStartWatering(humidity)) {
